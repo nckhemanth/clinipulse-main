@@ -13,7 +13,7 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 5000, // temporary value used to reproduce long-running inference failures
+    timeout: 120000, // 120 seconds for AI, email and Azure Blob operations
 });
 
 // Types
