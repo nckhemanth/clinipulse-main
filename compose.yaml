@@ -1,0 +1,71 @@
+services:
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/clinipulse
+      DATABASE_USERNAME: clinipulse
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-clinipulse}
+      AZURE_STORAGE_CONNECTION_STRING: UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite
+      AZURE_STORAGE_CONTAINER: medical-documents
+      CHROMA_HOST: http://chroma
+      CHROMA_PORT: 8000
+      AI_BASE_URL: ${AI_BASE_URL:-http://host.docker.internal:11434}
+      AI_API_KEY: ${AI_API_KEY:-local-development-key}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-llama3.3:70b}
+      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-nomic-embed-text}
+      SECURITY_ENABLED: ${SECURITY_ENABLED:-false}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+      chroma:
+        condition: service_started
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: clinipulse
+      POSTGRES_USER: clinipulse
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-clinipulse}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinipulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  chroma:
+    image: chromadb/chroma:1.0.21
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/data
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.35.0
+    command: azurite-blob --blobHost 0.0.0.0
+    ports:
+      - "10000:10000"
+    volumes:
+      - azurite-data:/data
+
+volumes:
+  postgres-data:
+  chroma-data:
+  azurite-data:
