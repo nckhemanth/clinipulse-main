@@ -5,6 +5,8 @@ CliniPulse AI is a secure medical-document intelligence platform for clinical re
 
 ## Architecture
 
+For a visual system map, component responsibilities, deployment boundaries, and the document-to-answer flow, see the [architecture package](architecture/README.md).
+
 - **Backend:** Java 21, Spring Boot, Spring Security, Spring Data JPA, and Spring AI
 - **Frontend:** React, Next.js, and TypeScript
 - **Application data:** PostgreSQL with Flyway migrations

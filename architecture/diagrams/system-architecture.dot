@@ -1,0 +1,33 @@
+digraph ClinipulseArchitecture {
+  graph [rankdir=LR, bgcolor="white", pad=0.35, nodesep=0.55, ranksep=0.8, fontname="Helvetica", label="CliniPulse AI — System Architecture", labelloc=t, fontsize=22];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11, color="#334155", penwidth=1.4, margin="0.18,0.12"];
+  edge [fontname="Helvetica", fontsize=9, color="#475569", penwidth=1.4, arrowsize=0.8];
+
+  user [label="Clinician / Reviewer", fillcolor="#e0f2fe"];
+  web [label="Clinical Workspace\nNext.js · React · TypeScript", fillcolor="#dbeafe"];
+
+  subgraph cluster_api {
+    label="Java 21 / Spring Boot API"; color="#93c5fd"; style="rounded,filled"; fillcolor="#eff6ff";
+    security [label="Spring Security\nOAuth 2.0 JWT + scopes", fillcolor="#fef3c7"];
+    documents [label="Document Service\nvalidate · hash · lifecycle", fillcolor="#ffffff"];
+    rag [label="Spring AI RAG Service\nretrieve · ground · answer", fillcolor="#ffffff"];
+  }
+
+  postgres [label="PostgreSQL\nmetadata + audit state", shape=cylinder, fillcolor="#dcfce7"];
+  blob [label="Azure Blob Storage\nsource PDFs", shape=cylinder, fillcolor="#cffafe"];
+  chroma [label="ChromaDB\nchunks + vectors", shape=cylinder, fillcolor="#ede9fe"];
+  embedding [label="Embedding Model\nOpenAI-compatible", fillcolor="#f3e8ff"];
+  llm [label="Llama Chat Model\nOpenAI-compatible endpoint", fillcolor="#fae8ff"];
+
+  user -> web [label="HTTPS"];
+  web -> security [label="REST + JWT"];
+  security -> documents [label="authorized upload"];
+  security -> rag [label="authorized question"];
+  documents -> postgres [label="JPA / Flyway"];
+  documents -> blob [label="store PDF"];
+  documents -> embedding [label="chunk text"];
+  embedding -> chroma [label="write vectors"];
+  rag -> chroma [label="similarity search"];
+  rag -> llm [label="prompt + context"];
+  rag -> web [label="answer + sources", constraint=false];
+}

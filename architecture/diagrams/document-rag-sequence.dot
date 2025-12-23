@@ -1,0 +1,16 @@
+digraph ClinipulseSequence {
+  graph [rankdir=TB, bgcolor="white", pad=0.3, nodesep=0.4, ranksep=0.5, fontname="Helvetica", label="CliniPulse — Upload and Grounded Answer Sequence", labelloc=t, fontsize=21];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#334155", fillcolor="#f8fafc", margin="0.16,0.1"];
+  edge [fontname="Helvetica", fontsize=9, color="#475569", penwidth=1.3];
+  start [label="1  User uploads a clinical PDF", fillcolor="#dbeafe"];
+  auth [label="2  Next.js sends multipart request + JWT"];
+  validate [label="3  Spring Security authorizes; API validates PDF and SHA-256"];
+  persist [label="4  Store PDF in Azure Blob; persist metadata in PostgreSQL"];
+  index [label="5  Extract chunks; create embeddings; write ChromaDB vectors"];
+  ready [label="6  Mark document READY and return chunk count", fillcolor="#dcfce7"];
+  ask [label="7  User submits a clinical question", fillcolor="#dbeafe"];
+  retrieve [label="8  Retrieve top-five relevant chunks from ChromaDB"];
+  generate [label="9  Send guarded prompt + context to Llama endpoint"];
+  answer [label="10  Return grounded answer + relevant filenames", fillcolor="#dcfce7"];
+  start -> auth -> validate -> persist -> index -> ready -> ask -> retrieve -> generate -> answer;
+}
